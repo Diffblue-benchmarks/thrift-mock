@@ -1,0 +1,394 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 214.875
+#  >methods=39
+#  >complexity=484
+#  >construction=12.5
+#  >dependency=16.0
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response$ResponseStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response$ResponseTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+# Target TGF: 153.892857143
+#  >methods=33
+#  >complexity=346
+#  >construction=8.14285714286
+#  >dependency=12.5
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_args.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_args$sayBye_argsStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_args$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_args$sayBye_argsTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+# Target TGF: 150.892857143
+#  >methods=33
+#  >complexity=329
+#  >construction=8.14285714286
+#  >dependency=13.0
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_result.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_result$sayHello_resultTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_result$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_result$sayHello_resultStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+# Target TGF: 150.892857143
+#  >methods=33
+#  >complexity=329
+#  >construction=8.14285714286
+#  >dependency=13.0
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_result.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_result$sayBye_resultTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_result$sayBye_resultStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Response.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Response.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/ByeService$sayBye_result$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/ByeService.java
+# Target TGF: 33.6666666667
+#  >methods=9
+#  >complexity=139
+#  >construction=3.0
+#  >dependency=4.66666666667
+ - target:
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/AsyncThriftMockServer.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/AsyncThriftMockServer.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/AsyncProcessFunctionMock.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/AsyncProcessFunctionMock.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/Config.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/Config.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/AsyncTMockProcessor.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/AsyncTMockProcessor.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockServer.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockServer.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/AsyncServerConfig.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/AsyncServerConfig.java
+# Target TGF: 121.142857143
+#  >methods=33
+#  >complexity=315
+#  >construction=6.89285714286
+#  >dependency=10.5
+ - target:
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockResult.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockResult.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockResult$MockResultTupleSchemeFactory.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockResult.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockResult$MockResultStandardSchemeFactory.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockResult.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockResult$_Fields.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockResult.java
+# Target TGF: 147.75
+#  >methods=32
+#  >complexity=325
+#  >construction=7.25
+#  >dependency=12.0
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request$RequestStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request$RequestTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+# Target TGF: 46.125
+#  >methods=3
+#  >complexity=52
+#  >construction=4.5
+#  >dependency=1.25
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/TProtocolUtil.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/TProtocolUtil.java
+# Target TGF: 35.2
+#  >methods=9
+#  >complexity=139
+#  >construction=3.0
+#  >dependency=4.7
+ - target:
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/ThriftMockServer.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/ThriftMockServer.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/ProcessFunctionMock.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/ProcessFunctionMock.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/ServerConfig.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/ServerConfig.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/MockServer.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/MockServer.java
+   - dir: thrift-mock-server/target/classes
+     file: com/didiglobal/thriftmock/server/TMockProcessor.class
+     sourceDir: thrift-mock-server/src/main/java
+     sourceFile: com/didiglobal/thriftmock/server/TMockProcessor.java
+# Target TGF: 153.892857143
+#  >methods=33
+#  >complexity=346
+#  >construction=8.14285714286
+#  >dependency=12.5
+ - target:
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_args.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_args$sayHello_argsTupleSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/Request.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/Request.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_args$_Fields.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
+   - dir: thrift-mock-test-source/target/classes
+     file: com/didiglobal/thriftmock/test/source/HelloService$sayHello_args$sayHello_argsStandardSchemeFactory.class
+     sourceDir: thrift-mock-test-source/src/main/java
+     sourceFile: com/didiglobal/thriftmock/test/source/HelloService.java
